@@ -1,5 +1,5 @@
 <div align="center">
-  <img alt="fastgplearn" src="https://gitee.com/boliqq07/fastgplearn/blob/main/img.jpg">
+  <img alt="fastgplearn" src="https://gitee.com/boliqq07/fastgplearn/blob/main/img.jpg?raw=true">
 </div>
 
 [![Python Versions](https://img.shields.io/pypi/pyversions/fastgplearn.svg)](https://pypi.org/project/fastgplearn/)
