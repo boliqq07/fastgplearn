@@ -1,9 +1,3 @@
-[comment]: <> (<div align="center">)
-
-[comment]: <> (  <img alt="fastgplearn" src="https://gitee.com/boliqq07/fastgplearn/blob/main/img.jpg?raw=true">)
-
-[comment]: <> (</div>)
-
 [![Jetbrains](./img.jpg)](https://gitee.com/boliqq07/fastgplearn)
 
 
@@ -23,7 +17,6 @@ Featurebox inspired by
 
 [gplearn](https://gplearn.readthedocs.io/en/stable/intro.html),
 [BGP](https://bgp.readthedocs.io/en/latest/index.html),
-
 
 
 Document
