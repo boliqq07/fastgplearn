@@ -1,5 +1,5 @@
 include README.md
 include requirements.txt
 include LICENSE
-include source/*.pyx
-include source/*.cpp
+include */source/*.pyx
+include */source/*.cpp

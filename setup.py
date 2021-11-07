@@ -17,7 +17,7 @@ with open(path.join(this_directory, 'fastgplearn/README.md'), encoding='utf-8') 
 setup(
 
     name='fastgplearn',
-    version='0.0.01',
+    version='0.0.02',
     keywords=['genetic programming","symbolic learning'],
     description='Fast fitting formula.',
     install_requires=['pandas', 'numpy', 'scipy', 'scikit-learn', 'joblib', 'deprecated',
@@ -30,7 +30,7 @@ setup(
     maintainer='wangchangxin',
     platforms=[
         "Windows",
-        "Unix",
+        "Linux",
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -38,7 +38,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Operating System :: Microsoft :: Windows",
-        "Operating System :: Unix",
+        "Operating System :: Linux",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
