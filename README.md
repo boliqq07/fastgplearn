@@ -1,5 +1,5 @@
 <div align="center">
-  <img alt="fastgplearn" src="https://github.com/boliqq07/fastgplearn/blob/master/img.jpg?raw=true">
+  <img alt="fastgplearn" src="https://gitee.com/boliqq07/fastgplearn/blob/main/img.jpg">
 </div>
 
 [![Python Versions](https://img.shields.io/pypi/pyversions/fastgplearn.svg)](https://pypi.org/project/fastgplearn/)
@@ -44,7 +44,7 @@ Developer: boliqq07: 986798607@qq.com
 
 Support
 ----------------------
-[![Jetbrains](../jetbrains.svg)](https://jb.gg/OpenSource)
+[![Jetbrains](./jetbrains.svg)](https://jb.gg/OpenSource)
 
 
 
