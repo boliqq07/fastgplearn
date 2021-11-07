@@ -1,6 +1,11 @@
-<div align="center">
-  <img alt="fastgplearn" src="https://gitee.com/boliqq07/fastgplearn/blob/main/img.jpg?raw=true">
-</div>
+[comment]: <> (<div align="center">)
+
+[comment]: <> (  <img alt="fastgplearn" src="https://gitee.com/boliqq07/fastgplearn/blob/main/img.jpg?raw=true">)
+
+[comment]: <> (</div>)
+
+[![Jetbrains](./img.jpg)](https://gitee.com/boliqq07/fastgplearn)
+
 
 [![Python Versions](https://img.shields.io/pypi/pyversions/fastgplearn.svg)](https://pypi.org/project/fastgplearn/)
 [![Version](https://img.shields.io/github/tag/boliqq07/fastgplearn.svg)](https://github.com/boliqq07/releases/latest)
