@@ -1,0 +1,12 @@
+deprecated
+pandas~=1.0.1
+numpy
+torch
+numba
+scipy~=1.5.0
+joblib~=0.14.1
+setuptools~=49.2.0
+six~=1.15.0
+scikit-learn~=0.24.0
+mgetool>=0.0.30
+
