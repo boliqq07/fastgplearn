@@ -27,14 +27,14 @@ store_of_fame         (int)        3         [0,10]                   hall of fr
 method_backend       (string)      "p_numpy" /                        optional: ("p_numpy","c_numpy","p_torch","c_torch")
 device               (string)      "cpu"     /                        optional: ("cpu","cuda:0", ...) depend on your computer device
 func_p              (np.ndarray)   None      /                        specific the probability values of each function
-sci_preset            list, str    "default" /                        1. user self-defined list template 2. "default" 3. None
+sci_preset            list, str    "default" /                        user self-defined list template or "default" or  None
 ================== =============== ========= =======================  ======================================================
 
 
 Fit Parameters:
 ::::::::::::::::::::::
 
-Fit parameters in SymbolicRegressor().fit() or SymbolicRegressor().fit() method.
+Fit parameters in ``SymbolicRegressor().fit()`` or ``SymbolicRegressor().fit()`` method.
 
 ================== =============== ========= =======================  ======================================================
 Parameters name    Type            Default   Suggest Range            Definition
@@ -49,13 +49,13 @@ x_label            list of string  None      /                        specific t
 Other Parameters:
 ::::::::::::::::::::::
 
-Other parameters maybe in predict() or score(), or top_n() method.
+Other parameters maybe in ``predict()`` or ``score()``, or ``top_n()`` method.
 
 ================== =============== ========= =======================  ======================================================
 Parameters name    Type            Default   Suggest Range            Definition
 ------------------ --------------- --------- -----------------------  ------------------------------------------------------
 X                  (np.ndarray)    /         /                        with shape (n_sample, n_fea)
 y                  (np.ndarray)    /         /                        with shape (n_sample,)
-n                     (int)        0         0                        specify the number of expression to calculate or score.
-scoring               (str)        /         /                        for regression, default is "r2", for classification is "accuracy".
+n                     (int)        0         0                        specify the number of expression to calculate or score
+scoring               (str)        /         /                        for regression, default is "r2", for classification is "accuracy"
 ================== =============== ========= =======================  ======================================================
