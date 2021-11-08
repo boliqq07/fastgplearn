@@ -134,7 +134,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
 
         func_index_ = set(tuple(self.func_index))
         for site, pre_i in sci_preset:
-            if len(set(tuple(pre_i)) & func_index_) == 0:
+            if set(tuple(pre_i)) <= func_index_:
                 temp_sci_preset.append([list(pre_i), [self.func_index.index(i) for i in pre_i]])
 
         return temp_sci_preset

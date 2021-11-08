@@ -5,4 +5,6 @@ Guide
    :maxdepth: 2
 
    pards
+   benchmark
+
 
