@@ -2,7 +2,7 @@ Introduction
 ==================
 
 FastGPLearn implements Genetic Programming in Python, with a scikit-learn inspired and compatible API.
-And the fastgplearn applied the `torch` and `numpy` backend for fast calculated, make it accessible for CUDA.
+And the fastgplearn applied the ``torch`` and ``numpy`` backend for fast calculated, make it accessible for CUDA.
 
 
 While Genetic Programming (GP) can be used to perform a very wide variety of tasks, fastgplearn is purposefully
@@ -21,7 +21,7 @@ and grid search modules. You can get started with fastgplearn as simply as:
 >>> est.fit(X_train, y_train)
 >>> y_pred = est.predict(X_test)
 
-fastgplearn supports regression through the SymbolicRegressor, binary classification with the SymbolicClassifier.
+fastgplearn supports regression through the ``SymbolicRegressor``, binary classification with the ``SymbolicClassifier``.
 
 
 

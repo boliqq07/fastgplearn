@@ -18,7 +18,7 @@ class CLICommand:
 
     Example:
 
-        $ mgetool cc_numpy
+        $ fastgplearn cc_numpy
     """
 
     @staticmethod

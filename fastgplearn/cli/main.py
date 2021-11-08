@@ -14,8 +14,8 @@ class CLIError(Exception):
 # python3 -m ase.cli.completion to update autocompletion.
 commands_ = [
 
-    ('cc_numpy', 'mgetool.cli.cc_numpy'),
-    ('cc_torch', 'mgetool.cli.cc_torch'),
+    ('cc_numpy', 'fastgplearn.cli.cc_numpy'),
+    ('cc_torch', 'fastgplearn.cli.cc_torch'),
 
 ]
 
@@ -60,7 +60,7 @@ def main(prog='fastgplearn', description='fastgplearn command line tool.', args=
             help=short,
             description=long)
         cmd.add_arguments(subparser)
-        functions[command] = cmd.run_gp
+        functions[command] = cmd.run
         parsers[command] = subparser
 
     args = parser.parse_args(args)

@@ -18,7 +18,7 @@ class CLICommand:
 
     Example:
 
-        $ mgetool cc_torch
+        $ fastgplearn cc_torch
     """
 
     @staticmethod
