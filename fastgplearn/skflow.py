@@ -50,11 +50,13 @@ class SymbolicEstimator(BaseEstimator, ABC):
             p_mutate: mutate probability.
             p_crossover (float): crossover probability.
             random_state (int):random state
-            hall_of_fame (int): hall of frame number.
+            hall_of_fame (int): hall of frame number to add to next generation.
+            store_of_fame (int): hall of frame number to return result.
             method_backend (str): optional: ("p_numpy","c_numpy","p_torch","c_torch")
             device (str): default "cpu", "cuda:0", only accessible of torch.
             func_p (np.ndarray,tuple): with shape (n_function,), probability values of each function.
             sci_preset (str,list): None, "default" or user self-defined list template, default None.
+
 
         """
 
@@ -393,7 +395,8 @@ class SymbolicRegressor(SymbolicEstimator):
             p_mutate: mutate probability.
             p_crossover (float): crossover probability.
             random_state (int):random state
-            hall_of_fame (int): hall of frame number.
+            hall_of_fame (int): hall of frame number to add to next generation.
+            store_of_fame (int): hall of frame number to return result.
             method_backend (str): optional: ("p_numpy","c_numpy","p_torch","c_torch")
             device (str): default "cpu", "cuda:0", only accessible of torch.
             func_p (np.ndarray): with shape (n_function,), probability values of each function.
@@ -530,7 +533,8 @@ class SymbolicClassifier(SymbolicEstimator):
             p_mutate: mutate probability.
             p_crossover (float): crossover probability.
             random_state (int):random state
-            hall_of_fame (int): hall of frame number.
+            hall_of_fame (int): hall of frame number to add to next generation.
+            store_of_fame (int): hall of frame number to return result.
             method_backend (str): optional: ("p_numpy","c_numpy","p_torch","c_torch")
             device (str): default "cpu", "cuda:0", only accessible of torch.
             func_p (np.ndarray,tuple): with shape (n_function,), probability values of each function.

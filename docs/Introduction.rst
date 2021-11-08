@@ -21,7 +21,7 @@ and grid search modules. You can get started with fastgplearn as simply as:
 >>> est.fit(X_train, y_train)
 >>> y_pred = est.predict(X_test)
 
-fastgplearn supports regression through the ``SymbolicRegressor``, binary classification with the ``SymbolicClassifier``.
+fastgplearn supports regression through the :py:class:`SymbolicRegressor` , binary classification with the :py:class:`SymbolicClassifier` .
 
 
 
