@@ -29,6 +29,7 @@ Result
 ::
 
 For result, you can specify the number of expression to calculate or score.
+
 >>> sr.top_n(n = 10)
 >>> res0 = sr.score(x, y, n=0)
 >>> pre_y = sr.predict(x, y=None, n=0)
