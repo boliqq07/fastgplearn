@@ -54,7 +54,7 @@ This comparison for different backend and their parallelization performance.
 >>> "c_torch"
 >>> rs4 = c_torch_score_mp(deps, x2, y2, func_index=func_index, n_jobs=4)
 
-.. image:: : Graph1.png
+.. image:: Graph1.png
    :scale: 30
 .. image:: Graph2.png
    :scale: 30
