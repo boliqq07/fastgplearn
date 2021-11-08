@@ -13,10 +13,10 @@ class Logs:
 
     Examples:
 
-    >>>log = Logs()
-    >>>log.record("score:0.9")
-    >>>log.print(log)
-    >>>"score:0.9"
+    >>> log = Logs()
+    >>> log.record("score:0.9")
+    >>> log.print(log)
+    >>> "score:0.9"
     """
 
     def __init__(self):
@@ -53,9 +53,9 @@ class Hall:
 
     Examples:
 
-    >>>hall = Hall(size=50)
-    >>>hall.update(inds, gen_i, score, consts)
-    >>>hall[i]
+    >>> hall = Hall(size=50)
+    >>> hall.update(inds, gen_i, score, consts)
+    >>> hall[i]
 
     """
 
