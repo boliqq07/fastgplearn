@@ -9,18 +9,17 @@ FastGPLearn
 ------------------------
 Welcome to FastGPLearn.
 
-FastGPLearn implements Genetic Programming in Python, with a scikit-learn inspired and compatible API.
-And the fastgplearn applied the `torch` and `numpy` backend for fast calculated, make it accessible for CUDA.
+FastGPLearn implements Genetic Programming in Python, with a ``scikit-learn`` inspired and compatible API.
+And the FastGPLearn applied the ``torch`` and ``numpy`` backend for fast calculated, make it accessible for ``CUDA`` .
 
 FastGPLearn inspired by
-
 [gplearn](https://gplearn.readthedocs.io/en/stable/intro.html),
 [BGP](https://bgp.readthedocs.io/en/latest/index.html),
 
 
 Document
 ----------------------
-[fastgplearn document (English)](https://fastgplearn.readthedocs.io/en/latest/)
+[fastgplearn document (English)](https://fastgplearn-en.readthedocs.io/en/latest)
 
 [fastgplearn document (Chinese)](https://fastgplearn.readthedocs.io/en/latest/) 
 writing...

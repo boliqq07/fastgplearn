@@ -1,13 +1,13 @@
 Regression
 ==============
 
-Prepare the data
+**Prepare the data**
 ::
 
 >>> from sklearn.datasets import load_boston
 >>> x, y = load_boston(return_X_y=True)
 
-Fitting
+**Fitting**
 ::
 
 >>> from skflow import SymbolicRegressor
@@ -21,8 +21,7 @@ Fitting
 >>> sr.fit(x, y)
 
 
-
-Result
+**Result**
 ::
 
 For result, you can specify the number of expression to calculate or score.

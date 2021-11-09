@@ -5,10 +5,15 @@ Test device: E5 2680 v4, 14 core.
 Package Comparison
 :::::::::::::::::::
 
-This comparison for different packages speed.
+This comparison for different packages (
+`gplearn <https://gplearn.readthedocs.io/en/stable/>`_
+`BindingGP <https://bgp.readthedocs.io/en/latest/>`_)
+speed.
+
+Test datasets: boston datasets from ``scikit-learn`` .
 
 ===================== ============ ============ =================
-pop*gen times (s)     fastgplearn  gplearn      fastgplearn
+pop*gen times (s)     fastgplearn  gplearn      BindingGP
 --------------------- ------------ ------------ -----------------
 1000*10               0.15         4.91         29.09
 10000*10              1.49         50.66        295.34
@@ -26,7 +31,7 @@ This comparison for different backend and their parallelization performance.
 **Conclusion**
 
 1. For large ``sample`` datasets (more than 1000), ``torch`` > ``numpy``.
-2. For different ``population``, ``numpy`` > ``torch``.
+2. For any ``population`` variation, ``numpy`` > ``torch``.
 3. For "c_torch", keep n_jobs==1. c_torch is already well parallelized in c++ level, and does not need to be parallelized in python code.
 
 **Code**
@@ -34,7 +39,6 @@ This comparison for different backend and their parallelization performance.
 >>> np.random.seed(0)
 >>> deps = generate_random(func_num=13, xs_num=10, pop_size=10000, depth_min=1, depth_max=3)
 >>> deps = deps.tolist()
-
 
 >>> "p_numpy"
 >>> rs1 = p_np_score(deps, x, y, func_index=func_index)

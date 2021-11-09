@@ -3,7 +3,7 @@ Classification
 
 For binary classification problem.
 
-Prepare the data
+**Prepare the data**
 ::
 
 >>> from sklearn.datasets import load_iris
@@ -12,7 +12,7 @@ Prepare the data
 >>> x[49,:]=4 # just add noise
 >>> y=y[y<2]
 
-Fitting
+**Fitting**
 ::
 
 >>> from skflow import SymbolicClassifier
@@ -25,7 +25,7 @@ Fitting
 >>>                         sci_preset="default")
 >>> sr.fit(x, y)
 
-Result
+**Result**
 ::
 
 For result, you can specify the number of expression to calculate or score.
