@@ -3,7 +3,7 @@ Parameters details
 
 For both :py:class:`fastgplearn.skflow.SymbolicRegressor` and :py:class:`fastgplearn.skflow.SymbolicClassifier` .
 
-init Parameters:
+Init Parameters:
 ::::::::::::::::::::::
 
 ================== =============== ========= =======================  ======================================================

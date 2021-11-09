@@ -1,4 +1,4 @@
-Welcome to Fast GP learn 's documentation!
+Welcome to Fast GP Learn 's documentation!
 ==============================================
 
 .. toctree::
