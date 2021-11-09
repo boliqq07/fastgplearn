@@ -338,7 +338,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
 
             population[sp:(self.pop_n - self.hall_of_fame)] = mutate_sci(self.func_num, xcs_num,
                                                                          pop_size=self.pop_n - sp - self.hall_of_fame,
-                                                                         depth_min=1, depth_max=5,
+                                                                         depth_min=self.depth_min, depth_max=self.depth_max,
                                                                          p=None, func_p=self.func_p, xs_p=xcs_p,
                                                                          sci_preset=self.sci_preset)
             if self.hall_of_fame >= 0:

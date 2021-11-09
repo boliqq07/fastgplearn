@@ -4,6 +4,7 @@
 # @Software : PyCharm
 # @License  : GNU General Public License v3.0
 # @Author   : xxx
+import copy
 import functools
 import warnings
 from multiprocessing import Pool
@@ -276,7 +277,7 @@ def p_np_str_name(ve, xns, cns=None, y=None, func_index=None, real_names=None):
         xns = [f"x{i}" for i in range(len(xns))]
     else:
         assert len(xns) == len(real_names)
-        xns = real_names
+        xns = list(copy.copy(real_names))
 
     if cns is not None:
         cns = ["{:+.2f}".format(i) for i in cns]
