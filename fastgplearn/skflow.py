@@ -482,8 +482,8 @@ class SymbolicRegressor(SymbolicEstimator):
         self.logs.record_and_print(f"The top {n} result:")
         self.logs.record_and_print(f"Scoring by {scoring}: ( score, expression, coef, intercept )")
 
-        for ni in range(1,n+1):
-            pre_y, coef_, intercept_ = self.single_cal(n=n, with_coef=True)
+        for ni in range(n):
+            pre_y, coef_, intercept_ = self.single_cal(n=ni, with_coef=True)
             msg = str((sign * func(self.y, pre_y), self.single_name(ni), coef_, intercept_))
             self.logs.record_and_print(msg)
 
@@ -654,8 +654,8 @@ class SymbolicClassifier(SymbolicEstimator):
         self.logs.record_and_print(f"The top {n} result:")
         self.logs.record_and_print(f"Scoring by {scoring}: ( score, expression, coef, intercept )")
 
-        for ni in range(1, n+1):
-            pre_y, coef_, intercept_ = self.single_cal(n=n, with_coef=True)
+        for ni in range(n):
+            pre_y, coef_, intercept_ = self.single_cal(n=ni, with_coef=True)
             msg = str((sign * func(self.y, self.cla(pre_y)), self.single_name(ni), coef_, intercept_))
             self.logs.record_and_print(msg)
 
