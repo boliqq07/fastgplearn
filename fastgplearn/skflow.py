@@ -13,11 +13,11 @@ from mgetool.tool import time_this_function
 from sklearn.base import BaseEstimator
 from sklearn.metrics import get_scorer
 
-from fastgplearn.backend.p_numpy import p_np_str_name, p_np_cal, lg, lr
 from fastgplearn.backend import backend
+from fastgplearn.backend.p_numpy import p_np_str_name, p_np_cal, lg, lr
 from fastgplearn.gp import set_seed, generate_random, select_index, mutate_random, crossover, mutate_sci
-from fastgplearn.tools import Hall, Logs
 from fastgplearn.sci_formula import usr_preset
+from fastgplearn.tools import Hall, Logs
 
 try:
     import torch
@@ -413,6 +413,7 @@ class SymbolicRegressor(SymbolicEstimator):
                                                 constant_range=constant_range, constants=constants,
                                                 device=device, n_jobs=n_jobs, verbose=verbose, func_p=func_p,
                                                 )
+        self.logs = Logs("Person Corr")
 
     @staticmethod
     def single_coef_linear(X, y):
@@ -477,11 +478,18 @@ class SymbolicRegressor(SymbolicEstimator):
         func = scorer._score_func
         sign = scorer._sign
 
-        print(f"scoring by {scoring}: ( score, expression, coef, intercept )")
+        self.logs.record_and_print(" ")
+        self.logs.record_and_print(f"The top {n} result:")
+        self.logs.record_and_print(f"Scoring by {scoring}: ( score, expression, coef, intercept )")
 
-        for i in range(self.store_of_fame):
+        for ni in range(n):
             pre_y, coef_, intercept_ = self.single_cal(n=n, with_coef=True)
-            print(sign * func(self.y, pre_y), self.single_name(i), coef_, intercept_)
+            msg = str((sign * func(self.y, pre_y), self.single_name(ni), coef_, intercept_))
+            self.logs.record_and_print(msg)
+
+    def best_expression(self, scoring="r2"):
+        """Print the best expression."""
+        self.top_n(n=0, scoring=scoring)
 
 
 class SymbolicClassifier(SymbolicEstimator):
@@ -550,6 +558,7 @@ class SymbolicClassifier(SymbolicEstimator):
                                                  tournament_size=tournament_size, sci_preset=sci_preset,
                                                  constant_range=constant_range, constants=constants,
                                                  device=device, n_jobs=n_jobs, verbose=verbose, func_p=func_p, )
+        self.logs = Logs("Accuracy")
 
     def fit(self, X: np.ndarray, y: np.ndarray, xs_p: np.ndarray = None, x_label=None):
         """
@@ -642,9 +651,14 @@ class SymbolicClassifier(SymbolicEstimator):
         func = scorer._score_func
         sign = scorer._sign
 
-        print(f"The top result:")
-        print(f"scoring by {scoring}: ( score, expression, coef, intercept )")
+        self.logs.record_and_print(f"The top {n} result:")
+        self.logs.record_and_print(f"Scoring by {scoring}: ( score, expression, coef, intercept )")
 
-        for i in range(self.store_of_fame):
+        for ni in range(n):
             pre_y, coef_, intercept_ = self.single_cal(n=n, with_coef=True)
-            print(sign * func(self.y, self.cla(pre_y)), self.single_name(i), coef_, intercept_)
+            msg = str((sign * func(self.y, self.cla(pre_y)), self.single_name(ni), coef_, intercept_))
+            self.logs.record_and_print(msg)
+
+    def best_expression(self, scoring="accuracy"):
+        """Print the best expression."""
+        self.top_n(n=0, scoring=scoring)

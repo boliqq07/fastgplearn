@@ -19,23 +19,30 @@ class Logs:
     >>> "score:0.9"
     """
 
-    def __init__(self):
+    def __init__(self, head_msg=''):
         self.header = """
-         Results
--------------------------
-        """
+    {} Results
+----------------------------""".format(head_msg)
+
         self.temp = ""
         self.hold = []
 
-    def prints(self):
-        for gen, i in enumerate(self.hold):
-            print(f"gen {gen + 1}: {i}")
+    def prints(self,row=True):
+        if row:
+            for gen, i in enumerate(self.hold):
+                print(f"gen {gen + 1}: {i}")
+        else:
+            for gen, i in enumerate(self.hold):
+                print(i)
 
-    def print(self, head=False):
+    def print(self, head=False,row=True):
         if head:
             print(self.header)
         elif self.temp != "":
-            print(f"gen {len(self.hold)}: {self.temp}")
+            if row:
+                print(f"gen {len(self.hold)}: {self.temp}")
+            else:
+                print(self.temp)
             self.temp = ""
 
     def record(self, msg):
@@ -45,6 +52,10 @@ class Logs:
     def records(self, msg):
         [self.hold.extend(str(msgi)) for msgi in msg]
         self.temp = str(msg[-1])
+
+    def record_and_print(self, msg, row=False):
+        self.record(msg)
+        self.print(row=row)
 
 
 class Hall:
@@ -77,7 +88,10 @@ class Hall:
 
     def update(self, inds, gen_i, score, consts):
         """Add individual."""
-        index = np.argsort(score)[::-1][:int(0.05 * score.shape[0])]
+        sen = int(0.05 * score.shape[0])
+        sen = 1000 if sen > 1000 else sen
+
+        index = np.argsort(score)[::-1][:sen]
         inds = inds[index]
         score = score[index]
 
