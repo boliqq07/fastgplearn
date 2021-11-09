@@ -61,10 +61,10 @@ class SymbolicEstimator(BaseEstimator, ABC):
         """
 
         assert population_size > 100 and generations >= 1
-        # assert store_of_fame <= 0.01 * population_size
         assert tournament_size <= 30 and hall_of_fame <= store_of_fame
         assert hall_of_fame >= 1
         assert store_of_fame >= 10
+        assert depth[1] <= 8
         try:
             self.func_names, self._str_name, self._score_mp, self._score, self._cal = backend[method_backend]
         except KeyError:

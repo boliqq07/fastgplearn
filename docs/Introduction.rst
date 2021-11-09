@@ -5,7 +5,7 @@ FastGPLearn implements Genetic Programming in Python, with a ``scikit-learn`` in
 And the fastgplearn applied the ``torch`` and ``numpy`` backend for fast calculated, make it accessible for CUDA.
 
 
-While Genetic Programming (GP) can be used to perform a very wide variety of tasks, fastgplearn is purposefully
+While Genetic Programming (GP) can be used to perform a very wide variety of tasks, FastGPLearn is purposefully
 constrained to solving symbolic regression problems.
 
 Symbolic regression is a machine learning technique that aims to identify an underlying mathematical expression
@@ -17,10 +17,10 @@ the fittest individuals from the population to undergo genetic operations.
 The Optional operator including (``'add'``, ``'sub'``, ``'mul'``, ``'div'``, ``'ln'``, ``'exp'``, ``'pow2'``, ``'pow3'``,
 ``'rec'``, ``'max'``, ``'min'``, ``'sin'``, ``'cos'``).
 
-FastGPLearn retains the familiar scikit-learn **fit**/**predict** API. You can get started with fastgplearn as simply as:
+FastGPLearn retains the familiar ``scikit-learn`` **fit**/**predict** API. You can get started with FastGPLearn as simply as:
 
 
->>> from skflow import SymbolicClassifier
+>>> from fastgplearn.skflow import SymbolicRegressor
 >>> est = SymbolicRegressor()
 >>> est.fit(X_train, y_train)
 >>> y_test_pred = est.predict(X_test)

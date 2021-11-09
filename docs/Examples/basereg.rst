@@ -10,7 +10,7 @@ Regression
 **Fitting**
 ::
 
->>> from skflow import SymbolicRegressor
+>>> from fastgplearn.skflow import SymbolicRegressor
 >>> sr = SymbolicRegressor(population_size=1000, generations=10, stopping_criteria=0.95,
 >>>                         store=False, p_mutate=0.2, p_crossover=0.5, select_method="tournament",
 >>>                         tournament_size=5, hall_of_fame=3, store_of_fame=50,
