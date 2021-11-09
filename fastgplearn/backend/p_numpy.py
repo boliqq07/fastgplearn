@@ -275,7 +275,7 @@ def p_np_str_name(ve, xns, cns=None, y=None, func_index=None, real_names=None):
     if real_names is None:
         xns = [f"x{i}" for i in range(len(xns))]
     else:
-        assert len(xns) == real_names
+        assert len(xns) == len(real_names)
         xns = real_names
 
     if cns is not None:

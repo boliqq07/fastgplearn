@@ -17,7 +17,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 setup(
 
     name='fastgplearn',
-    version='0.0.09',
+    version='0.0.10',
     keywords=['genetic programming","symbolic learning'],
     description='Fast fitting formula.',
     install_requires=['pandas', 'numpy', 'scipy', 'scikit-learn', 'joblib', 'deprecated',
