@@ -6,5 +6,7 @@ Guide
 
    pards
    benchmark
+   sci_template
+
 
 

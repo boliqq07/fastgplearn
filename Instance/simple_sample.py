@@ -17,7 +17,7 @@ if __name__ == "__main__":
                            tournament_size=5, hall_of_fame=3, store_of_fame=50,
                            constant_range=(0, 1.0), constants=None, depth=(2, 5),
                            function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3","exp"),
-                           n_jobs=1, verbose=True, random_state=0, method_backend='p_numpy', func_p=None, sci_preset="default")
+                           n_jobs=1, verbose=True, random_state=0, method_backend='p_numpy', func_p=None, sci_template="default")
     tt.t
     sr.fit(x,y)
     res = sr.top_n(30)
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     #              constant_range=(0, 1.0), constants=None, depth=(2, 5),
     #              function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3","exp"),
     #              warm_start=False, low_memory=False,
-    #              n_jobs=1, verbose=True, random_state=None, method_backend='p_numpy', func_p=None,sci_preset="default")
+    #              n_jobs=1, verbose=True, random_state=None, method_backend='p_numpy', func_p=None,sci_template="default")
     # tt.t
     # sr.fit(x,y)
     # tt.t
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     #              constant_range=(0, 1.0), constants=None, depth=(2, 5),
     #              function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3","exp"),
     #              warm_start=False, low_memory=False,
-    #              n_jobs=1, verbose=True, random_state=None, method_backend='c_torch', func_p=None,sci_preset="default")
+    #              n_jobs=1, verbose=True, random_state=None, method_backend='c_torch', func_p=None,sci_template="default")
     # sr.fit(x,y)
 
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     #              constant_range=(0, 1.0), constants=None, depth=(2, 5),
     #              function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3","exp"),
     #              warm_start=False, low_memory=False,
-    #              n_jobs=1, verbose=True, random_state=None, method_backend='p_torch', func_p=None,sci_preset="default")
+    #              n_jobs=1, verbose=True, random_state=None, method_backend='p_torch', func_p=None,sci_template="default")
     # tt.t
     # sr.fit(x,y)
     # tt.t

@@ -120,7 +120,7 @@ class Hall:
     def change0(self):
         """Change the unused constants to 0."""
         x = np.logical_and(self.x_num <= self.inds[:, 1:], self.inds[:, 1:] < 100)
-        mark = np.where(~np.any(x, axis=0))
+        mark = np.where(~np.any(x, axis=1))
         self.const_gen[mark] = 0.0
 
     def sort_and_hash(self):

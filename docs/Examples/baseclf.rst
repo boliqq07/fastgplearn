@@ -22,7 +22,7 @@ For binary classification problem.
 >>>                         constant_range=(0, 1.0), constants=None, depth=(2, 5),
 >>>                         function_set=('add', 'sub', 'mul', 'div'),
 >>>                         n_jobs=1, verbose=True, random_state=0, method_backend='p_numpy', func_p=None,
->>>                         sci_preset="default")
+>>>                         sci_template="default")
 >>> sr.fit(x, y)
 
 **Result**

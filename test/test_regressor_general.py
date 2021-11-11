@@ -1,6 +1,6 @@
 import unittest
 from sklearn.datasets import load_boston
-from skflow import SymbolicRegressor
+from fastgplearn.skflow import SymbolicRegressor
 
 x, y = load_boston(return_X_y=True)
 
@@ -18,7 +18,7 @@ class MyTestCase(unittest.TestCase):
                                constant_range=(0, 1.0), constants=None, depth=(2, 5),
                                function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3", "exp"),
                                n_jobs=1, verbose=True, random_state=0, method_backend='p_numpy', func_p=None,
-                               sci_preset="default")
+                               sci_template="default")
         sr.fit(x, y)
         res = sr.top_n(30)
         res0 = sr.score(x, y, scoring="r2", n=0)

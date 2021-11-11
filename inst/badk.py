@@ -14,7 +14,7 @@ sr1 = FSR(population_size=10000, generations=3, stopping_criteria=0.95,
           constant_range=(0, 1.0), constants=None, depth=(2, 5),
           function_set=('add', 'sub', 'mul', 'div'),n_jobs=1, verbose=True,
           random_state=0, method_backend='p_numpy', func_p=None,
-          sci_preset="default")
+          sci_template="default")
 
 sr2 = SR(population_size=100000, generations=10, stopping_criteria=0.95, p_crossover=0.5,
          tournament_size=5, function_set=('add', 'sub', 'mul', 'div'), n_jobs=8, verbose=True, random_state=0,)

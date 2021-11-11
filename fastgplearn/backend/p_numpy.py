@@ -70,6 +70,7 @@ def cos_(a, b):
 
 funcs = [np.add, np.subtract, np.multiply, np.divide, ln_, exp_, pow2_, pow3_, rec_, max_, min_, sin_, cos_]
 func_names = ["add_", "sub_", "mul_", "div_", "ln_", "exp_", "pow2_", "pow3_", "rec_", "max_", "min_", "sin_", "cos_"]
+func_names_single = ["ln_", "exp_", "pow2_", "pow3_", "rec_", "sin_", "cos_"]
 
 
 # def get_corr_single(fake_y, y):
@@ -291,7 +292,11 @@ def p_np_str_name(ve, xns, cns=None, y=None, func_index=None, real_names=None):
         elif 2 * n >= len(vei):
             return xns[vei[n] - 100]
         else:
-            return f"{func_namesi[vei[n]]}({get_str(vei, 2 * n + 1 - root)},{get_str(vei, 2 * n + 2 - root)})"
+            funcns = func_namesi[vei[n]]
+            if funcns in func_names_single:
+                return f"{funcns}({get_str(vei, 2 * n + 1 - root)})"
+            else:
+                return f"{funcns}({get_str(vei, 2 * n + 1 - root)},{get_str(vei, 2 * n + 2 - root)})"
 
     res = []
     for vei in ve:

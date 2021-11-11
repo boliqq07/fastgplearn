@@ -6,7 +6,7 @@ Package Comparison
 :::::::::::::::::::
 
 This comparison for different packages (
-`gplearn <https://gplearn.readthedocs.io/en/stable/>`_
+`gplearn <https://gplearn.readthedocs.io/en/stable/>`_,
 `BindingGP <https://bgp.readthedocs.io/en/latest/>`_)
 speed.
 
@@ -30,7 +30,7 @@ This comparison for different backend and their parallelization performance.
 
 **Conclusion**
 
-1. For large ``sample`` datasets (more than 1000), ``torch`` > ``numpy``.
+1. For large ``samples`` datasets (more than 1000), ``torch`` > ``numpy``.
 2. For any ``population`` variation, ``numpy`` > ``torch``.
 3. For "c_torch", keep n_jobs==1. c_torch is already well parallelized in c++ level, and does not need to be parallelized in python code.
 

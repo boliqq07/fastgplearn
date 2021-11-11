@@ -145,7 +145,7 @@ def mutate(mutate_pop, func_num, xs_num, depth_min=1, depth_max=5, p_mutate=0.8,
     return mutate_pop
 
 
-def csub_science(pop, sci_preset):
+def csub_science(pop, sci_template):
     """
     This would change the init pop!!!
 
@@ -153,10 +153,10 @@ def csub_science(pop, sci_preset):
     """
     now_pop_n, prim_n = pop.shape
 
-    le_scis = len(sci_preset)
+    le_scis = len(sci_template)
 
     def get_real_index(n, prei=-1):
-        s, v = sci_preset[prei]
+        s, v = sci_template[prei]
 
         root = pop[n, 0]
         pop[n, root] = v[0]
@@ -170,7 +170,7 @@ def csub_science(pop, sci_preset):
     return pop
 
 
-def sub_science(pop, sci_preset):
+def sub_science(pop, sci_template):
     """
     This would change the init pop!!!
     sci substitute.
@@ -178,10 +178,10 @@ def sub_science(pop, sci_preset):
     now_pop_n, prim_n = pop.shape
     half_prim_n = prim_n / 2
 
-    le_scis = len(sci_preset)
+    le_scis = len(sci_template)
 
     def get_real_index(n, prei=-1):
-        s, v = sci_preset[prei]
+        s, v = sci_template[prei]
 
         root = pop[n, 0]
         pop[n, root] = v[0]
@@ -239,7 +239,7 @@ def mutate_random(pop_np, func_num, xs_num, pop_size=10, depth_min=1, depth_max=
 
 
 def mutate_sci(func_num, xs_num, pop_size=10, depth_min=1, depth_max=5, p=None, func_p=None,
-               xs_p=None, sci_preset=None):
+               xs_p=None, sci_template=None):
     """
     Mutate.
     Each individual with ordered: [mark,1,2,3,4,5,6,7, 103,102,100,102,102,103,102,100]
@@ -257,7 +257,7 @@ def mutate_sci(func_num, xs_num, pop_size=10, depth_min=1, depth_max=5, p=None, 
         p (None): (just for test).
         func_p (np.ndarray): with shape of (n_func), probability,.
         xs_p (np.ndarray): with shape of (n_fea), probability.
-        sci_preset (list of list): the science expression templates.
+        sci_template (list of list): the science expression templates.
 
     Returns:
         pop (np.ndarray): population with shape (n_pop,2**depth_max).
@@ -265,13 +265,15 @@ def mutate_sci(func_num, xs_num, pop_size=10, depth_min=1, depth_max=5, p=None, 
     """
     new_pop = generate_random(func_num, xs_num, pop_size=pop_size, depth_min=depth_min, depth_max=depth_max,
                               p=p, func_p=func_p, xs_p=xs_p)
-    if sci_preset is None or sci_preset == []:
+    if sci_template is None or sci_template == []:
         pass
     else:
-        if csci_subs is None:
-            new_pop = sub_science(new_pop, sci_preset)
-        else:
-            new_pop = csub_science(new_pop, sci_preset)
+
+        new_pop = sub_science(new_pop, sci_template)
+        # if csci_subs is None:
+        #     new_pop = sub_science(new_pop, sci_template)
+        # else:
+        #     new_pop = csub_science(new_pop, sci_template)
 
     return new_pop
 

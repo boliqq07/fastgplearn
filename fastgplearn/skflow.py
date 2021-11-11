@@ -28,7 +28,7 @@ except ImportError:
 class SymbolicEstimator(BaseEstimator, ABC):
     def __init__(self, population_size=10000, generations=20, stopping_criteria=0.95, store_of_fame=50,
                  hall_of_fame=3, store=False, p_mutate=0.2, p_crossover=0.5, select_method="tournament",
-                 tournament_size=5, device="cpu", sci_preset=None,
+                 tournament_size=5, device="cpu", sci_template=None,
                  constant_range=(0, 1.0), constants=None, depth=(2, 5),
                  function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3"),
                  n_jobs=1, verbose=0, random_state=None, method_backend='p_numpy', func_p=None,
@@ -55,7 +55,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
             method_backend (str): optional: ("p_numpy","c_numpy","p_torch","c_torch")
             device (str): default "cpu", "cuda:0", only accessible of torch.
             func_p (np.ndarray,tuple): with shape (n_function,), probability values of each function.
-            sci_preset (str,list): None, "default" or user self-defined list template, default None.
+            sci_template (str,list): None, "default" or user self-defined list template, default None.
 
 
         """
@@ -118,26 +118,28 @@ class SymbolicEstimator(BaseEstimator, ABC):
         else:
             self.func_p = func_p
 
-        self.sci_preset = self.filter_sci_perset(sci_preset)
+        self.sci_template = self.filter_sci_perset(sci_template)
         self.xs = None
         self.y = None
         self.x_label = None
 
-    def filter_sci_perset(self, sci_preset):
+    def filter_sci_perset(self, sci_template):
         """Get the available sci available"""
-        if sci_preset is None:
-            sci_preset = []
-        elif sci_preset == "default":
-            sci_preset = usr_preset
+        if sci_template is None:
+            sci_template = []
+        elif sci_template == "default":
+            sci_template = usr_preset
 
-        temp_sci_preset = []
+        temp_sci_template = []
 
-        func_index_ = set(tuple(self.func_index))
-        for site, pre_i in sci_preset:
+        func_index_ = [-1,]
+        func_index_.extend(self.func_index)
+        func_index_ = set(tuple(func_index_))
+        for site, pre_i in sci_template:
             if set(tuple(pre_i)) <= func_index_:
-                temp_sci_preset.append([list(pre_i), [self.func_index.index(i) for i in pre_i]])
+                temp_sci_template.append([list(site), [self.func_index.index(i) if i != -1 else -1 for i in pre_i]])
 
-        return temp_sci_preset
+        return temp_sci_template
 
     def refresh_xcs_more(self):
         """Refresh X and constant for each generation for torch."""
@@ -190,6 +192,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
             x_label (np.ndarray): with shape (n_fea), names of xi.
 
         """
+        assert X.shape[1] < 120, "The feature of X is out of limitation."
         self.x_label = x_label
         X, y = self._validate_data(X, y=y)
 
@@ -338,9 +341,10 @@ class SymbolicEstimator(BaseEstimator, ABC):
 
             population[sp:(self.pop_n - self.hall_of_fame)] = mutate_sci(self.func_num, xcs_num,
                                                                          pop_size=self.pop_n - sp - self.hall_of_fame,
-                                                                         depth_min=self.depth_min, depth_max=self.depth_max,
+                                                                         depth_min=self.depth_min,
+                                                                         depth_max=self.depth_max,
                                                                          p=None, func_p=self.func_p, xs_p=xcs_p,
-                                                                         sci_preset=self.sci_preset)
+                                                                         sci_template=self.sci_template)
             if self.hall_of_fame >= 0:
                 population[-self.hall_of_fame:] = self.hall.inds[:self.hall_of_fame]
 
@@ -375,7 +379,7 @@ class SymbolicRegressor(SymbolicEstimator):
     def __init__(self, population_size=10000, generations=20, stopping_criteria=0.95, store_of_fame=50,
                  hall_of_fame=3, store=False, p_mutate=0.2, p_crossover=0.5, select_method="tournament",
                  tournament_size=5, constant_range=(0, 1.0), constants=None, depth=(2, 5),
-                 function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3"), sci_preset=None,
+                 function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3"), sci_template=None,
                  device="cpu", n_jobs=1, verbose=0, random_state=None, method_backend='p_numpy', func_p=None,
                  ):
         """
@@ -400,7 +404,7 @@ class SymbolicRegressor(SymbolicEstimator):
             method_backend (str): optional: ("p_numpy","c_numpy","p_torch","c_torch")
             device (str): default "cpu", "cuda:0", only accessible of torch.
             func_p (np.ndarray): with shape (n_function,), probability values of each function.
-            sci_preset (str,list): None, "default" or user self-defined list template, default None.
+            sci_template (str,list): None, "default" or user self-defined list template, default None.
 
         """
         super(SymbolicRegressor, self).__init__(population_size=population_size, generations=generations,
@@ -409,7 +413,7 @@ class SymbolicRegressor(SymbolicEstimator):
                                                 hall_of_fame=hall_of_fame, p_mutate=p_mutate, depth=depth,
                                                 p_crossover=p_crossover, function_set=function_set,
                                                 select_method=select_method, method_backend=method_backend,
-                                                tournament_size=tournament_size, sci_preset=sci_preset,
+                                                tournament_size=tournament_size, sci_template=sci_template,
                                                 constant_range=constant_range, constants=constants,
                                                 device=device, n_jobs=n_jobs, verbose=verbose, func_p=func_p,
                                                 )
@@ -519,7 +523,7 @@ class SymbolicClassifier(SymbolicEstimator):
 
     def __init__(self, population_size=10000, generations=20, stopping_criteria=0.95, store_of_fame=50,
                  hall_of_fame=3, store=False, p_mutate=0.2, p_crossover=0.5, select_method="tournament",
-                 tournament_size=5, device="cpu", sci_preset=None,
+                 tournament_size=5, device="cpu", sci_template=None,
                  constant_range=(0, 1.0), constants=None, depth=(2, 5),
                  function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3"),
                  n_jobs=1, verbose=0, random_state=None, method_backend='p_numpy', func_p=None,
@@ -546,7 +550,7 @@ class SymbolicClassifier(SymbolicEstimator):
             method_backend (str): optional: ("p_numpy","c_numpy","p_torch","c_torch")
             device (str): default "cpu", "cuda:0", only accessible of torch.
             func_p (np.ndarray,tuple): with shape (n_function,), probability values of each function.
-            sci_preset (str,list): None, "default" or user self-defined list template, default None.
+            sci_template (str,list): None, "default" or user self-defined list template, default None.
 
         """
         super(SymbolicClassifier, self).__init__(population_size=population_size, generations=generations,
@@ -555,7 +559,7 @@ class SymbolicClassifier(SymbolicEstimator):
                                                  hall_of_fame=hall_of_fame, p_mutate=p_mutate, depth=depth,
                                                  p_crossover=p_crossover, function_set=function_set,
                                                  select_method=select_method, method_backend=method_backend,
-                                                 tournament_size=tournament_size, sci_preset=sci_preset,
+                                                 tournament_size=tournament_size, sci_template=sci_template,
                                                  constant_range=constant_range, constants=constants,
                                                  device=device, n_jobs=n_jobs, verbose=verbose, func_p=func_p, )
         self.logs = Logs("Accuracy")
