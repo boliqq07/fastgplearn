@@ -27,7 +27,7 @@ store_of_fame         (int)        3         [0,10]                   hall of fr
 method_backend       (string)      "p_numpy" /                        optional: ("p_numpy","c_numpy","p_torch","c_torch")
 device               (string)      "cpu"     /                        optional: ("cpu","cuda:0", ...) depend on your computer device
 func_p              (np.ndarray)   None      /                        specific the probability values of each function
-sci_template            list, str    "default" /                        user self-defined list template or "default" or  None
+sci_template          list, str    "default" /                        user self-defined list template or "default" or  None
 ================== =============== ========= =======================  ======================================================
 
 
