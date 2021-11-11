@@ -423,7 +423,7 @@ class SymbolicRegressor(SymbolicEstimator):
     def single_coef_linear(X, y):
         """Fitting by sklearn.linear_model.LinearRegression."""
         lr.fit(X.reshape(-1, 1), y)
-        return lr.coef_[0] * X + lr.intercept_, lr.coef_[0], lr.intercept_
+        return lr.coef_[0] * X + lr.intercept_, lr.coef_.ravel()[0], lr.intercept_.ravel()[0]
 
     def _single_cal(self, vei, xs, y, func_index, with_coef=False):
         """Return (y,coef,intercept). if with coef is False, coef and intercept are all 0."""
@@ -585,7 +585,7 @@ class SymbolicClassifier(SymbolicEstimator):
     def single_coef_logistic(self, X, y):
         """Fitting by sklearn.linear_model.LogisticRegression."""
         lg.fit(X.reshape(-1, 1), y)
-        return lg.coef_[0] * X + lg.intercept_, lg.coef_[0], lg.intercept_
+        return lg.coef_[0] * X + lg.intercept_, lg.coef_.ravel()[0], lg.intercept_.ravel()[0]
 
     def _single_cal(self, vei, xs, y, func_index, with_coef=False):
         """Return (y,coef,intercept). if with coef is False, coef and intercept are all 0."""
