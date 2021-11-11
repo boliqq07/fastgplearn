@@ -10,7 +10,7 @@ Parameter ``sci_template`` could be ``"default"``, ``None``, or user-defined tem
 
 For target problem:
 
-:math:`y = exp((X_0+X_2) / X_1)`
+:math:`y = exp((X_0+X_2)/X_1)`
 
 The ``"default"`` would be far faster than ``None`` to find the target expression, It is natural.
 
@@ -36,7 +36,6 @@ The ``"default"`` would be far faster than ``None`` to find the target expressio
 >>>                         # sci_template=None)
 >>> sr1.fit(x, y)
 >>> sr1.top_n(30)
-
 
 .. image:: with_t.png
 
