@@ -7,6 +7,7 @@
 import os
 
 import numpy as np
+from mgetool.tool import time_this_function
 from numpy.random import choice
 from numpy import random as nprdm
 
@@ -152,15 +153,16 @@ def csub_science(pop, sci_template):
     pyx version for sci substitute.
     """
     now_pop_n, prim_n = pop.shape
+    half_prim_n = int(prim_n / 2)
 
     le_scis = len(sci_template)
 
     def get_real_index(n, prei=-1):
         s, v = sci_template[prei]
 
-        root = pop[n, 0]
+        root = int(pop[n, 0])
         pop[n, root] = v[0]
-        csci_subs(pop, s, v, root, n)
+        csci_subs(pop, s, v, root, n,half_prim_n)
 
     index = nprdm.randint(0, high=le_scis, size=now_pop_n)
 
@@ -268,12 +270,12 @@ def mutate_sci(func_num, xs_num, pop_size=10, depth_min=1, depth_max=5, p=None, 
     if sci_template is None or sci_template == []:
         pass
     else:
-
-        new_pop = sub_science(new_pop, sci_template)
-        # if csci_subs is None:
-        #     new_pop = sub_science(new_pop, sci_template)
-        # else:
-        #     new_pop = csub_science(new_pop, sci_template)
+        pass
+        # new_pop = sub_science(new_pop, sci_template)
+        if csci_subs is None:
+            new_pop = sub_science(new_pop, sci_template)
+        else:
+            new_pop = csub_science(new_pop, sci_template)
 
     return new_pop
 

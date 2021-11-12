@@ -29,8 +29,8 @@ class MyTestCase(unittest.TestCase):
                                 constant_range=(0, 1.0), constants=None, depth=(2, 4),
                                 function_set=('add', 'sub', 'mul', 'div',"exp"),
                                 n_jobs=1, verbose=True, random_state=0, method_backend='p_numpy', func_p=None,
-                                # sci_template="default")
-                                sci_template=None)
+                                sci_template="default")
+                                # sci_template=None)
         x, y = self.x, self.y
         sr.fit(x, y)
         sr.top_n(30)

@@ -1,4 +1,5 @@
 ﻿# cython: language_level=3
+# cython: boundscheck=False
 # -*- coding: utf-8 -*-
 
 # @Time     : 2021/11/1 11:08
@@ -7,8 +8,10 @@
 # @Author   : xxx
 
 import warnings
-
 import numpy as np
+from numpy import log,exp,sin,cos,add, subtract, multiply, divide,stack
+from numpy import max as maxx
+from numpy import min as minn
 
 warnings.filterwarnings("ignore")
 
@@ -30,12 +33,47 @@ warnings.filterwarnings("ignore")
 #     return np.divide(a, b)
 
 
+# def ln_(a, b):
+#     return np.log(a)
+#
+#
+# def exp_(a, b):
+#     return np.exp(a)
+#
+#
+# def pow2_(a, b):
+#     return a ** 2
+#
+#
+# def pow3_(a, b):
+#     return a ** 3
+#
+#
+# def rec_(a, b):
+#     return 1 / a
+#
+#
+# def max_(a, b):
+#     return np.max(np.stack((a, b)), 0)
+#
+#
+# def min_(a, b):
+#     return np.min(np.stack((a, b)), 0)
+#
+#
+# def sin_(a, b):
+#     return np.cos(a)
+#
+#
+# def cos_(a, b):
+#     return np.sin(a)
+
 def ln_(a, b):
-    return np.log(a)
+    return log(a)
 
 
 def exp_(a, b):
-    return np.exp(a)
+    return exp(a)
 
 
 def pow2_(a, b):
@@ -51,22 +89,23 @@ def rec_(a, b):
 
 
 def max_(a, b):
-    return np.max(np.stack((a, b)), 0)
+    return maxx(stack((a, b)), 0)
 
 
 def min_(a, b):
-    return np.min(np.stack((a, b)), 0)
+    return minn(stack((a, b)), 0)
 
 
 def sin_(a, b):
-    return np.cos(a)
+    return cos(a)
 
 
 def cos_(a, b):
-    return np.sin(a)
+    return sin(a)
 
 
-funcs = [np.add, np.subtract, np.multiply, np.divide, ln_, exp_, pow2_, pow3_, rec_, max_, min_, sin_, cos_]
+# funcs = [np.add, np.subtract, np.multiply, np.divide, ln_, exp_, pow2_, pow3_, rec_, max_, min_, sin_, cos_]
+funcs = [add, subtract, multiply, divide, ln_, exp_, pow2_, pow3_, rec_, max_, min_, sin_, cos_]
 func_names = ["add_", "sub_", "mul_", "div_", "ln_", "exp_", "pow2_", "pow3_", "rec_", "max_", "min_", "sin_", "cos_"]
 
 
@@ -96,13 +135,42 @@ def get_corr_together(fake_ys, y):
 
     return np.abs(np.nan_to_num(corr,posinf=0, neginf=0))
 
+# old version slowly!!
+# def c_np_cal(ve, xs, y, func_index=None):
+#     """Batch calculation."""
+#     funci = [funcs[i] for i in func_index] if func_index is not None else funcs
+#     error_y = np.zeros_like(y)
+#
+#     def get_value(vei, n=0):
+#
+#         root = vei[0]
+#
+#         if vei[n] >= 100:
+#             return xs[vei[n] - 100]
+#         elif 2 * n >= len(vei):
+#             return xs[vei[n] - 100]
+#         else:
+#             return funci[vei[n]](get_value(vei, 2 * n + 1 - root), get_value(vei, 2 * n + 2 - root))
+#
+#     res = []
+#     for vei in ve:
+#         try:
+#             resi = get_value(vei, vei[0])
+#         except TypeError:
+#             resi = error_y
+#         res.append(resi)
+#
+#     # res = [get_value(vei, vei[0]) for vei in ve]
+#
+#     return res
 
 def c_np_cal(ve, xs, y, func_index=None):
     """Batch calculation."""
     funci = [funcs[i] for i in func_index] if func_index is not None else funcs
-    error_y = np.zeros_like(y)
+    cdef float[:] error_y = np.zeros_like(y)
+    cdef int root
 
-    def get_value(vei, n=0):
+    def get_value(list vei, int n=0):
 
         root = vei[0]
 
@@ -113,12 +181,11 @@ def c_np_cal(ve, xs, y, func_index=None):
         else:
             return funci[vei[n]](get_value(vei, 2 * n + 1 - root), get_value(vei, 2 * n + 2 - root))
 
-    res = []
+    cdef list res = []
+
+    cdef list vei
     for vei in ve:
-        try:
-            resi = get_value(vei, vei[0])
-        except TypeError:
-            resi = error_y
+        resi = get_value(vei, vei[0])
         res.append(resi)
 
     # res = [get_value(vei, vei[0]) for vei in ve]
@@ -169,13 +236,33 @@ def c_np_score(ve, xs, y, func_index,clf=False):
     else:
         return get_sort_accuracy_together(rs7, y)
 
+# old version slowly!!
+# cpdef sci_subs(unsigned char [:,:] pop,list s,list v,int root,int n,int half_prim_n):
+#     # """sci subs (pyx version)."""
+#     cdef float m = 0.5
+#     cdef int ind
+#     cdef int site
+#     for si, vi in zip(s[1:], v[1:]):
+#         m = -m
+#         site = int(2 * si + m + 1.5 + root)
+#         if site >= half_prim_n:
+#             break
+#         elif vi != -1:
+#             ind = int(2 * si + m + 1.5 + root)
+#             pop[n, ind] = vi
 
-cpdef sci_subs(int [:,:] pop,list s,list v,int root,int n,int half_prim_n):
+cpdef sci_subs(unsigned char [:,:] pop,list s,list v,int root,int n,int half_prim_n):
     # """sci subs (pyx version)."""
     cdef float m = 0.5
     cdef int ind
     cdef int site
-    for si, vi in zip(s[1:], v[1:]):
+    cdef int si
+    cdef int vi
+    cdef int sz = len(s)
+
+    for nn in range(1,sz,1):
+        si = s[nn]
+        vi = v[nn]
         m = -m
         site = int(2 * si + m + 1.5 + root)
         if site >= half_prim_n:

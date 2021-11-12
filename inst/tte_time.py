@@ -17,9 +17,9 @@ from fastgplearn.backend.c_torch import c_torch_score, c_torch_score_mp
 
 from fastgplearn.backend.p_torch import p_torch_score, p_torch_score_mp
 
-from fastgplearn.backend.c_numpy import c_np_score, c_np_score_mp
+from fastgplearn.backend.c_numpy import c_np_score, c_np_score_mp, c_np_cal
 
-from fastgplearn.backend.p_numpy import p_np_score, p_np_score_mp
+from fastgplearn.backend.p_numpy import p_np_score, p_np_score_mp, p_np_cal
 
 from mgetool.tool import tt
 from numpy.random import choice
@@ -42,25 +42,33 @@ if __name__ == "__main__":
     deps = generate_random(func_num=13, xs_num=10, pop_size=100000, depth_min=1, depth_max=3, p=None, func_p=None, xs_p=None)
     tt.t2
     deps = deps.tolist()
+    #
+    tt.t30
+    rs = p_np_cal(deps, x, y, func_index=func_index)
+    tt.t40
 
-    tt.t3
-    rs = p_np_score(deps, x, y, func_index=func_index)
-    tt.t4
-    rs = p_np_score_mp(deps, x, y, func_index=func_index, n_jobs=4)
-    tt.t5
+    rs = c_np_cal(deps, x, y, func_index=func_index)
+    tt.t60
 
-    rs = c_np_score(deps, x, y, func_index=func_index)
-    tt.t6
-    rs = c_np_score_mp(deps, x, y, func_index=func_index, n_jobs=4)
-    tt.t7
 
-    rs1 = p_torch_score(deps, x2, y2, func_index=func_index)
-    tt.t8
-    rs2 = p_torch_score_mp(deps, x2, y2, func_index=func_index, n_jobs=4)
-    tt.t9
-    rs3 = c_torch_score(deps, x2, y2, func_index=func_index,return_numpy=True)
-    tt.t10
-    rs4 = c_torch_score_mp(deps, x2, y2, func_index=func_index, n_jobs=4,return_numpy=True)
-    tt.t11
+    # tt.t3
+    # rs = p_np_score(deps, x, y, func_index=func_index)
+    # tt.t4
+    # rs = p_np_score_mp(deps, x, y, func_index=func_index, n_jobs=4)
+    # tt.t5
+    #
+    # rs = c_np_score(deps, x, y, func_index=func_index)
+    # tt.t6
+    # rs = c_np_score_mp(deps, x, y, func_index=func_index, n_jobs=4)
+    # tt.t7
+    #
+    # rs1 = p_torch_score(deps, x2, y2, func_index=func_index)
+    # tt.t8
+    # rs2 = p_torch_score_mp(deps, x2, y2, func_index=func_index, n_jobs=4)
+    # tt.t9
+    # rs3 = c_torch_score(deps, x2, y2, func_index=func_index,return_numpy=True)
+    # tt.t10
+    # rs4 = c_torch_score_mp(deps, x2, y2, func_index=func_index, n_jobs=4,return_numpy=True)
+    # tt.t11
     tt.p
 
