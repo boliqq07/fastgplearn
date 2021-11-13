@@ -14,8 +14,8 @@ a relationship between known independent variables and their dependent variable 
 new data. Each successive generation of programs is then evolved from the one that came before it by selecting
 the fittest individuals from the population to undergo genetic operations.
 
-The optional operator including (``'add'``, ``'sub'``, ``'mul'``, ``'div'``, ``'ln'``, ``'exp'``, ``'pow2'``, ``'pow3'``,
-``'rec'``, ``'max'``, ``'min'``, ``'sin'``, ``'cos'``).
+The optional operator including (``'add'``, ``'sub'``, ``'mul'``, ``'div'``, ``'max'``, ``'min'``, ``'ln'``, ``'exp'``, ``'pow2'``, ``'pow3'``,
+``'rec'``,  ``'sin'``, ``'cos'``).
 
 FastGPLearn retains the familiar ``scikit-learn`` **fit**/**predict** API. You can get started with FastGPLearn as simply as:
 
