@@ -5,6 +5,18 @@
 # @License  : GNU General Public License v3.0
 # @Author   : xxx
 import numpy as np
+from mgetool.tool import tt
+
+try:
+    from fastgplearn.backend.c_numpy import find_add_mask_all
+except BaseException:
+    from fastgplearn.backend.p_numpy import find_add_mask_all
+
+
+def find_add_mask_all_merge(pop, single_start=6):
+    pop = pop.astype(np.int32)
+    pop = find_add_mask_all(pop, single_start)
+    return np.array(pop).astype(np.uint8)
 
 
 class Logs:
@@ -27,7 +39,7 @@ class Logs:
         self.temp = ""
         self.hold = []
 
-    def prints(self,row=True):
+    def prints(self, row=True):
         if row:
             for gen, i in enumerate(self.hold):
                 print(f"gen {gen + 1}: {i}")
@@ -35,7 +47,7 @@ class Logs:
             for gen, i in enumerate(self.hold):
                 print(i)
 
-    def print(self, head=False,row=True):
+    def print(self, head=False, row=True):
         if head:
             print(self.header)
         elif self.temp != "":
@@ -75,13 +87,15 @@ class Hall:
         self.inds = None
         self.const_gen = None
         self.x_num = 0
+        self.single_start = 6
         self.scores = None
         if self.size == 0 or self.size is None:
             self.update = self._update
         self.last_gen = 0
 
-    def refresh_x_num(self, x_num):
+    def get_share_parameter(self, x_num, single_start):
         self.x_num = x_num
+        self.single_start = single_start
 
     def _update(self, *args):
         pass
@@ -119,9 +133,9 @@ class Hall:
 
     def change0(self):
         """Change the unused constants to 0."""
-        x = np.logical_and(self.x_num <= self.inds[:, 1:], self.inds[:, 1:] < 100)
-        mark = np.where(~np.any(x, axis=1))
-        self.const_gen[mark] = 0.0
+        self.inds = find_add_mask_all_merge(self.inds, self.single_start)
+        find = np.any(self.inds[:, 1:] >= (100 + self.x_num), axis=1)
+        self.const_gen[~find] = 0.0
 
     def sort_and_hash(self):
         """Remove the repeat result,
@@ -138,6 +152,19 @@ class Hall:
         self.inds = inds[index, :].astype(np.uint8)
         self.const_gen = const_gen[index, :].astype(np.float32)
         self.scores = scores[index]
+
+    def best_constant(self):
+        """Return the best individual's constant for next generation."""
+        if np.all(self.const_gen[0] == 0):
+            return self.const_gen[0]
+
+        ss = self.inds[0, 1:]
+        index = ss >= (100 + self.x_num)
+        ls = ss[index] - 100 - self.x_num
+        sub_index = [i for i in range(self.const_gen.shape[1]) if i not in ls]
+        const = self.const_gen[0]
+        const[sub_index] = 0
+        return const
 
     def __reversed__(self):
         index = np.argsort(self.scores)[::-1]

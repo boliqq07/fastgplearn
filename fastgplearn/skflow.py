@@ -9,13 +9,14 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
-from mgetool.tool import time_this_function
+from mgetool.tool import time_this_function, tt
+from numpy.random import randint
 from sklearn.base import BaseEstimator
 from sklearn.metrics import get_scorer
 
 from fastgplearn.backend import backend
 from fastgplearn.backend.p_numpy import p_np_str_name, p_np_cal, lg, lr
-from fastgplearn.gp import set_seed, generate_random, select_index, mutate_random, crossover, mutate_sci
+from fastgplearn.gp import set_seed, generate_random, select_index, mutate_random, crossover, mutate_sci, sub_re_hall99
 from fastgplearn.sci_formula import usr_preset
 from fastgplearn.tools import Hall, Logs
 
@@ -29,7 +30,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
     def __init__(self, population_size=10000, generations=20, stopping_criteria=0.95, store_of_fame=50,
                  hall_of_fame=3, store=False, p_mutate=0.2, p_crossover=0.5, select_method="tournament",
                  tournament_size=5, device="cpu", sci_template=None,
-                 constant_range=(0, 1.0), constants=None, depth=(2, 5),
+                 constant_range=None, constants=None, depth=(2, 5),
                  function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3"),
                  n_jobs=1, verbose=0, random_state=None, method_backend='p_numpy', func_p=None,
 
@@ -44,7 +45,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
             constant_range (tuple): floats. constant_range=(0,1.0)
             constants (tuple): floats. constants=(-1,1,2,10), if given, The parameter constant_range would be ignored.
             depth (tuple): default (2, 5), The max of depth is not more than 8.
-            function_set (tuple): tuple of str. optional: ('add', 'sub', 'mul', 'div', "ln", "exp", "pow2", "pow3", "rec", "max", "min", "sin", "cos").
+            function_set (tuple): tuple of str. optional: ('add', 'sub', 'mul', 'div',"max", "min",  "ln", "exp", "pow2", "pow3", "rec", "sin", "cos").
             n_jobs (int):n jobs to parallel.
             verbose (bool):print message.
             p_mutate: mutate probability.
@@ -60,7 +61,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
 
         """
 
-        assert population_size > 100 and generations >= 1
+        assert population_size >= 100 and generations >= 1
         assert tournament_size <= 30 and hall_of_fame <= store_of_fame
         assert hall_of_fame >= 1
         assert store_of_fame >= 10
@@ -75,12 +76,10 @@ class SymbolicEstimator(BaseEstimator, ABC):
         self.generations = self.gen = generations
         self.tournament_size = tournament_size
         self.stopping_criteria = stopping_criteria
-        self.constants = constants
         self.depth = depth
         self.select_method = select_method
         self.depth_min = depth[0]
         self.depth_max = depth[1]
-        self.function_set = function_set
         self.store_of_fame = store_of_fame
 
         self.n_jobs = n_jobs
@@ -91,6 +90,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
         self.p_crossover = p_crossover
         self.constant_n = 5
         self.device = device
+        self.temp_c = None
 
         self.constant_gen = []
         self.hall = Hall(size=store_of_fame)
@@ -102,15 +102,22 @@ class SymbolicEstimator(BaseEstimator, ABC):
         if random_state is not None:
             set_seed(random_state)
 
-        self.func_index = [self.func_names.index(f"{i}_") for i in function_set]
+        func_index = [self.func_names.index(f"{i}_") for i in function_set]
+        func_index.sort()  # force !!!
+        self.func_index = func_index
+
+        self.function_set = [self.func_names[i] for i in func_index]
         self.func_num = len(function_set)
         self.xs_p = None
 
-        if constants is None:
+        if constants is not None:
+            self.constants = list(constants)
             self.constant_range = None
         else:
+            self.constants = None
             self.constant_range = constant_range
-        self.constants = constants
+            if constant_range is not None:
+                assert constant_range[0] < constant_range[1]
 
         if isinstance(func_p, (list, tuple)):
             func_p = list(func_p)
@@ -123,6 +130,11 @@ class SymbolicEstimator(BaseEstimator, ABC):
         self.y = None
         self.x_label = None
 
+        if func_index is None:
+            self.single_start = 6
+        else:
+            self.single_start = next((x for x in range(len(func_index)) if func_index[x] >= 6), len(func_index))
+
     def filter_sci_perset(self, sci_template):
         """Get the available sci available"""
         if sci_template is None:
@@ -132,7 +144,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
 
         temp_sci_template = []
 
-        func_index_ = [-1,]
+        func_index_ = [-1, ]
         func_index_.extend(self.func_index)
         func_index_ = set(tuple(func_index_))
         for site, pre_i in sci_template:
@@ -143,7 +155,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
 
     def refresh_xcs_more(self):
         """Refresh X and constant for each generation for torch."""
-        xcs, xcs_p, xcs_p_shape0, y = self.refresh_xcs()
+        xcs, xcs_p, xcs_shape0, y = self.refresh_xcs()
 
         if "torch" in self.method_backend and torch is not None:
             if self.device != "cpu":
@@ -154,7 +166,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
                 xcs = torch.from_numpy(xcs)
                 y = torch.from_numpy(y)
 
-        return xcs, xcs_p, xcs_p_shape0, y
+        return xcs, xcs_p, xcs_shape0, y
 
     def refresh_xcs(self):
         """Refresh X and constant for each generation."""
@@ -164,13 +176,22 @@ class SymbolicEstimator(BaseEstimator, ABC):
             return self.xs, None, self.xs.shape[0], self.y
 
         elif self.constants is None and self.constant_range is not None:
-            temp_cons = np.random.random(self.constant_range[0], self.constant_range[1], self.constant_n).astype(
-                np.float32)
+            if self.temp_c is not None:
+                temp_cons = self.temp_c
+                index = temp_cons == 0
+                sum0 = np.sum(index)
+                temp_cons[index] = np.random.random(sum0) * (self.constant_range[1] - self.constant_range[0]) + \
+                                   self.constant_range[0]
+                temp_cons[~index] = temp_cons[~index] * (1 + 0.1 * np.random.random(temp_cons[~index].shape)).astype(
+                    np.float32)
+            else:
+                temp_cons = np.random.random(self.constant_n).astype(np.float32)
+                temp_cons = temp_cons * (self.constant_range[1] - self.constant_range[0]) + self.constant_range[0]
         else:
             temp_cons = np.array(self.constants).astype(np.float32)
             self.constant_n = temp_cons.shape[0]
         self.constant_gen.append(temp_cons)
-        xcs = np.concatenate((self.xs, np.array(temp_cons).reshape(-1, 1)))
+        xcs = np.concatenate((self.xs, np.array(temp_cons).reshape(-1, 1).repeat(self.xs.shape[1], axis=1)), axis=0)
 
         if self.xs_p is not None:
             xcs_p = np.append(0.9 * self.xs_p, 0.1 / np.ones_like(temp_cons))
@@ -178,7 +199,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
             xcs_p = None
         y = self.y
 
-        return xcs, xcs_p, xcs_p.shape[0], y
+        return xcs, xcs_p, xcs.shape[0], y
 
     @time_this_function
     def fit(self, X: np.ndarray, y: np.ndarray, xs_p: np.ndarray = None, x_label=None):
@@ -192,6 +213,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
             x_label (np.ndarray): with shape (n_fea), names of xi.
 
         """
+        # tt.ts0
         assert X.shape[1] < 120, "The feature of X is out of limitation."
         self.x_label = x_label
         X, y = self._validate_data(X, y=y)
@@ -211,8 +233,9 @@ class SymbolicEstimator(BaseEstimator, ABC):
             self.xs_p = np.array(xs_p)
         else:
             self.xs_p = xs_p
-
-        self.hall.refresh_x_num(self.xs.shape[0])
+        # tt.ts1
+        self.hall.get_share_parameter(self.xs.shape[0], self.single_start)
+        # tt.ts2
         self.run_gp()
 
     def single_name(self, n):
@@ -286,7 +309,7 @@ class SymbolicEstimator(BaseEstimator, ABC):
         xcs, xcs_p, xcs_num, y = self.refresh_xcs_more()
 
         # 1.generate###################################################################
-
+        # tt.ts3
         population = generate_random(self.func_num, xs_num=xcs_num, pop_size=self.pop_n,
                                      depth_min=self.depth_min, depth_max=self.depth_max,
                                      p=None, func_p=self.func_p, xs_p=xcs_p)
@@ -297,8 +320,9 @@ class SymbolicEstimator(BaseEstimator, ABC):
             population_list = population.tolist()
 
             score_result = self._score_mp(population_list, xs=xcs, y=y, func_index=self.func_index,
-                                          n_jobs=self.n_jobs)
-
+                                          n_jobs=self.n_jobs, single_start=self.single_start)
+            # if gen_i==2:
+            #     tt.ts4
             if "torch" in self.method_backend:
                 score_result = score_result.cpu().numpy()
 
@@ -307,6 +331,8 @@ class SymbolicEstimator(BaseEstimator, ABC):
             if self.store:
                 self.all_scores.append(score_result)
 
+            # if gen_i==2:
+            #     tt.ts5
             self.hall.update(population, gen_i, score_result, self.constant_gen[-1])
             max_ind_score = np.max(score_result)
             self.logs.record(max_ind_score)
@@ -316,6 +342,9 @@ class SymbolicEstimator(BaseEstimator, ABC):
                 print("Reach the stopping criteria and terminate early at generation {}".format(gen_i))
                 break
 
+            # if gen_i==2:
+            #     tt.ts6
+
             if gen_i == self.gen:
                 break
 
@@ -323,30 +352,44 @@ class SymbolicEstimator(BaseEstimator, ABC):
             # selection and mutate,mate,migration
 
             if self.constants is None:
+                self.temp_c = self.hall.best_constant()
                 xcs, xcs_p, xcs_num, y = self.refresh_xcs_more()
 
             couple_index = select_index(score_result, num_percent=self.pop_n - self.hall_of_fame,
                                         method=self.select_method,
                                         tour_num=self.tournament_size)
 
+            # if gen_i==2:
+            #     tt.ts7
             couple_index = population[couple_index]
 
+            # if gen_i==2:
+            #     tt.ts8
             offspring = crossover(couple_index, p_crossover=self.p_crossover)
 
             sp = int(0.7 * self.pop_n)
 
+            # if gen_i==2:
+            #      tt.ts9
             population[:sp] = mutate_random(offspring[:sp], self.func_num, xcs_num, pop_size=self.pop_n,
                                             depth_min=self.depth_min, depth_max=self.depth_max, p_mutate=self.p_mutate,
                                             p=None, func_p=self.func_p, xs_p=xcs_p)
+            # if gen_i == 2:
+            #     tt.ts11
             population[sp:(self.pop_n - self.hall_of_fame)] = mutate_sci(self.func_num, xcs_num,
                                                                          pop_size=self.pop_n - sp - self.hall_of_fame,
                                                                          depth_min=self.depth_min,
                                                                          depth_max=self.depth_max,
                                                                          p=None, func_p=self.func_p, xs_p=xcs_p,
                                                                          sci_template=self.sci_template)
+            # if gen_i == 2:
+            #     tt.ts12
 
             if self.hall_of_fame >= 0:
-                population[-self.hall_of_fame:] = self.hall.inds[:self.hall_of_fame]
+                population[-self.hall_of_fame:] = sub_re_hall99(self.hall.inds[:self.hall_of_fame], self.func_num,
+                                                                xcs_num)
+            # if gen_i == 2:
+            #     tt.ts13
 
 
 #
@@ -378,7 +421,7 @@ class SymbolicRegressor(SymbolicEstimator):
 
     def __init__(self, population_size=10000, generations=20, stopping_criteria=0.95, store_of_fame=50,
                  hall_of_fame=3, store=False, p_mutate=0.2, p_crossover=0.5, select_method="tournament",
-                 tournament_size=5, constant_range=(0, 1.0), constants=None, depth=(2, 5),
+                 tournament_size=5, constant_range=None, constants=None, depth=(2, 4),
                  function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3"), sci_template=None,
                  device="cpu", n_jobs=1, verbose=0, random_state=None, method_backend='p_numpy', func_p=None,
                  ):
@@ -391,9 +434,9 @@ class SymbolicRegressor(SymbolicEstimator):
             stopping_criteria (float): criteria of correlation score, max 1.0.
             constant_range (tuple): floats. constant_range=(0,1.0)
             constants (tuple): floats. constants=(-1,1,2,10), if given, The parameter constant_range would be ignored.
-            depth (tuple): default (2, 5), The max of depth is not more than 8.
-            function_set (tuple): tuple of str. optional: ('add', 'sub', 'mul', 'div', "ln", "exp", "pow2", "pow3",
-                "rec", "max", "min", "sin", "cos").
+            depth (tuple): default (2, 4), The max of depth is not more than 8.
+            function_set (tuple): tuple of str. optional: ('add', 'sub', 'mul', 'div', "max", "min", "ln", "exp", "pow2", "pow3",
+                "rec", "sin", "cos").
             n_jobs (int):n jobs to parallel.
             verbose (bool):print message.
             p_mutate: mutate probability.
@@ -428,7 +471,7 @@ class SymbolicRegressor(SymbolicEstimator):
     def _single_cal(self, vei, xs, y, func_index, with_coef=False):
         """Return (y,coef,intercept). if with coef is False, coef and intercept are all 0."""
 
-        pre_y = p_np_cal([vei, ], xs, y, func_index)[0]
+        pre_y = p_np_cal([vei, ], xs, y, func_index, self.single_start)[0]
 
         if with_coef:
             pre_y_coef, coef_, intercept_ = self.single_coef_linear(pre_y, y)
@@ -524,7 +567,7 @@ class SymbolicClassifier(SymbolicEstimator):
     def __init__(self, population_size=10000, generations=20, stopping_criteria=0.95, store_of_fame=50,
                  hall_of_fame=3, store=False, p_mutate=0.2, p_crossover=0.5, select_method="tournament",
                  tournament_size=5, device="cpu", sci_template=None,
-                 constant_range=(0, 1.0), constants=None, depth=(2, 5),
+                 constant_range=None, constants=None, depth=(2, 4),
                  function_set=('add', 'sub', 'mul', 'div', "pow2", "pow3"),
                  n_jobs=1, verbose=0, random_state=None, method_backend='p_numpy', func_p=None,
                  ):
@@ -538,8 +581,8 @@ class SymbolicClassifier(SymbolicEstimator):
             constant_range (tuple): floats. constant_range=(0,1.0)
             constants (tuple): floats. constants=(-1,1,2,10), if given, The parameter constant_range would be ignored.
             depth (tuple): default (2, 5), The max of depth is not more than 8.
-            function_set (tuple): tuple of str. optional: ('add', 'sub', 'mul', 'div', "ln", "exp", "pow2", "pow3",
-                "rec", "max", "min", "sin", "cos").
+            function_set (tuple): tuple of str. optional: ('add', 'sub', 'mul', 'div',"max", "min", "ln", "exp", "pow2", "pow3",
+                "rec",  "sin", "cos").
             n_jobs (int):n jobs to parallel.
             verbose (bool):print message.
             p_mutate: mutate probability.
@@ -590,7 +633,7 @@ class SymbolicClassifier(SymbolicEstimator):
     def _single_cal(self, vei, xs, y, func_index, with_coef=False):
         """Return (y,coef,intercept). if with coef is False, coef and intercept are all 0."""
 
-        pre_y = p_np_cal([vei, ], xs, y, func_index)[0]
+        pre_y = p_np_cal([vei, ], xs, y, func_index, self.single_start)[0]
 
         if with_coef:
             pre_y_coef, coef_, intercept_ = self.single_coef_logistic(pre_y, self.y)

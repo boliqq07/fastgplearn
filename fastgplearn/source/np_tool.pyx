@@ -8,8 +8,10 @@
 # @Author   : xxx
 
 import warnings
+from collections import deque
+
 import numpy as np
-from numpy import log,exp,sin,cos,add, subtract, multiply, divide,stack
+from numpy import log, exp, sin, cos, add, subtract, multiply, divide, stack
 from numpy import max as maxx
 from numpy import min as minn
 
@@ -104,9 +106,8 @@ def cos_(a, b):
     return sin(a)
 
 
-# funcs = [np.add, np.subtract, np.multiply, np.divide, ln_, exp_, pow2_, pow3_, rec_, max_, min_, sin_, cos_]
-funcs = [add, subtract, multiply, divide, ln_, exp_, pow2_, pow3_, rec_, max_, min_, sin_, cos_]
-func_names = ["add_", "sub_", "mul_", "div_", "ln_", "exp_", "pow2_", "pow3_", "rec_", "max_", "min_", "sin_", "cos_"]
+funcs = [add, subtract, multiply, divide, max_, min_, ln_, exp_, pow2_, pow3_, rec_,  sin_, cos_]
+func_names = ["add_", "sub_", "mul_", "div_", "max_", "min_", "ln_", "exp_", "pow2_", "pow3_", "rec_", "sin_", "cos_"]
 
 
 def get_corr_together(fake_ys, y):
@@ -164,7 +165,7 @@ def get_corr_together(fake_ys, y):
 #
 #     return res
 
-def c_np_cal(ve, xs, y, func_index=None):
+def c_np_cal(ve, xs, y, func_index=None, int single_start=6):
     """Batch calculation."""
     funci = [funcs[i] for i in func_index] if func_index is not None else funcs
     cdef float[:] error_y = np.zeros_like(y)
@@ -179,7 +180,10 @@ def c_np_cal(ve, xs, y, func_index=None):
         elif 2 * n >= len(vei):
             return xs[vei[n] - 100]
         else:
-            return funci[vei[n]](get_value(vei, 2 * n + 1 - root), get_value(vei, 2 * n + 2 - root))
+            if vei[n] < single_start:
+                return funci[vei[n]](get_value(vei, 2 * n + 1 - root), get_value(vei, 2 * n + 2 - root))
+            else:
+                return funci[vei[n]](get_value(vei, 2 * n + 1 - root), error_y)
 
     cdef list res = []
 
@@ -225,11 +229,11 @@ def get_sort_accuracy_together(fake_ys, y):
     return score
 
 
-def c_np_score(ve, xs, y, func_index,clf=False):
+def c_np_score(ve, xs, y, func_index,clf=False,single_start=6):
     """Batch score."""
     if isinstance(ve, np.ndarray):
         ve = ve.tolist()
-    rs6 = c_np_cal(ve, xs, y, func_index)
+    rs6 = c_np_cal(ve, xs, y, func_index,single_start)
     rs7 = np.array(rs6)
     if not clf:
         return get_corr_together(rs7, y)
@@ -272,3 +276,41 @@ cpdef sci_subs(unsigned char [:,:] pop,list s,list v,int root,int n,int half_pri
             pop[n, ind] = vi
 
 
+cdef int[:] find_add_mask(int[:] popi, int single_start=6):
+
+    cdef int root = popi[0]
+    left = deque([0, ])
+    cdef list store = [0, root,]
+    cdef int sz = popi.shape[0]
+
+    cdef int i
+    cdef int k
+
+    while len(left)>0:
+
+        i = left.pop()
+        store.append(root+2*i+1)
+        if popi[root+2*i+1]<100:
+            left.appendleft(2*i+1)
+        if popi[root+i]<single_start:
+            store.append(root + 2 * i + 2)
+            if popi[root+2*i+2]<100:
+                left.appendleft(2*i+2)
+
+    for k in range(sz):
+        if k in store:
+            pass
+        else:
+            popi[k] = 99
+
+    return popi
+
+
+cpdef int[:,:] find_add_mask_all(int[:,:]  pop, int single_start=6):
+    cdef int ii
+    cdef int les = pop.shape[0]
+    cdef int [:] popi
+    for ii in range(les):
+        popi = pop[ii,:]
+        pop[ii,:] = find_add_mask(popi,single_start)
+    return pop

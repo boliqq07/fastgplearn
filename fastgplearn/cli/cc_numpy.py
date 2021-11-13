@@ -4,15 +4,12 @@
 # @Software : PyCharm
 # @License  : GNU General Public License v3.0
 # @Author   : xxx
-import os
 import pathlib
 
 from mgetool.draft import DraftPyx
-from mgetool.imports import BatchFile
 
 
 class CLICommand:
-
     """
     Compile pyx or c++ code.
 
@@ -36,7 +33,3 @@ class CLICommand:
         bd = DraftPyx(file, language="c++", temps="np_temps")
         bd.write()
         bd.quick_import(build=True, with_html=True)
-
-
-
-

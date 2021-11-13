@@ -7,6 +7,7 @@
 import copy
 import functools
 import warnings
+from collections import deque
 from multiprocessing import Pool
 
 import numpy as np
@@ -68,9 +69,12 @@ def cos_(a, b):
     return np.sin(a)
 
 
-funcs = [np.add, np.subtract, np.multiply, np.divide, ln_, exp_, pow2_, pow3_, rec_, max_, min_, sin_, cos_]
-func_names = ["add_", "sub_", "mul_", "div_", "ln_", "exp_", "pow2_", "pow3_", "rec_", "max_", "min_", "sin_", "cos_"]
+funcs = [np.add, np.subtract, np.multiply, np.divide, max_, min_, ln_, exp_, pow2_, pow3_, rec_, sin_, cos_]
+func_names = ["add_", "sub_", "mul_", "div_", "max_", "min_", "ln_", "exp_", "pow2_", "pow3_", "rec_", "sin_", "cos_"]
 func_names_single = ["ln_", "exp_", "pow2_", "pow3_", "rec_", "sin_", "cos_"]
+
+
+# single_start = 6
 
 
 # def get_corr_single(fake_y, y):
@@ -194,9 +198,10 @@ def get_sort_accuracy_together(fake_ys, y):
     return score
 
 
-def p_np_cal(ve, xs, y, func_index=None):
+def p_np_cal(ve, xs, y, func_index=None, single_start=6):
     """Batch calculate."""
     funci = [funcs[i] for i in func_index] if func_index is not None else funcs
+
     error_y = np.zeros_like(y)
 
     def get_value(vei, n=0):
@@ -208,7 +213,10 @@ def p_np_cal(ve, xs, y, func_index=None):
         elif 2 * n >= len(vei):
             return xs[vei[n] - 100]
         else:
-            return funci[vei[n]](get_value(vei, 2 * n + 1 - root), get_value(vei, 2 * n + 2 - root))
+            if vei[n] < single_start:
+                return funci[vei[n]](get_value(vei, 2 * n + 1 - root), get_value(vei, 2 * n + 2 - root))
+            else:
+                return funci[vei[n]](get_value(vei, 2 * n + 1 - root), error_y)
 
     res = []
     for vei in ve:
@@ -223,11 +231,11 @@ def p_np_cal(ve, xs, y, func_index=None):
     return res
 
 
-def p_np_score(ve, xs, y, func_index, clf=False):
+def p_np_score(ve, xs, y, func_index, clf=False, single_start=6):
     """Batch score."""
     if isinstance(ve, np.ndarray):
         ve = ve.tolist()
-    rs6 = p_np_cal(ve, xs, y, func_index)
+    rs6 = p_np_cal(ve, xs, y, func_index, single_start=single_start)
     rs7 = np.array(rs6)
     if not clf:
         return get_corr_together(rs7, y)
@@ -235,12 +243,12 @@ def p_np_score(ve, xs, y, func_index, clf=False):
         return get_sort_accuracy_together(rs7, y)
 
 
-def p_np_score_mp(ve, xs, y, func_index=None, n_jobs=1, clf=False):
+def p_np_score_mp(ve, xs, y, func_index=None, n_jobs=1, clf=False, single_start=6):
     """Batch score with n_jobs."""
     if isinstance(ve, np.ndarray):
         ve = ve.tolist()
     if n_jobs == 1:
-        return p_np_score(ve, xs, y, func_index, clf=clf)
+        return p_np_score(ve, xs, y, func_index, clf=clf, single_start=single_start)
     else:
 
         pool = Pool(n_jobs)
@@ -258,7 +266,8 @@ def p_np_score_mp(ve, xs, y, func_index=None, n_jobs=1, clf=False):
             bs = int(len(ve) // n_jobs)
             nve = [ve[bs * (i - 1):i * bs] for i in range(1, n_jobs + 1)]
 
-        func = functools.partial(p_np_score, xs=tuple(xs), y=y, func_index=func_index, clf=clf)
+        func = functools.partial(p_np_score, xs=tuple(xs), y=y, func_index=func_index, clf=clf,
+                                 single_start=single_start)
 
         res = [i for i in pool.map_async(func, nve).get()]
         pool.close()
@@ -307,6 +316,54 @@ def p_np_str_name(ve, xns, cns=None, y=None, func_index=None, real_names=None):
         res.append(resi)
 
     return res
+
+
+def find_used_index(popi, single_start=6):
+    root = popi[0]
+    left = deque([0, ])
+    store = [root, ]
+    while len(left) > 0:
+        i = left.pop()
+        store.append(root + 2 * i + 1)
+        if popi[root + 2 * i + 1] < 100:
+            left.appendleft(2 * i + 1)
+        if popi[root + i] < single_start:
+            store.append(root + 2 * i + 2)
+            if popi[root + 2 * i + 2] < 100:
+                left.appendleft(2 * i + 2)
+    return store
+
+
+def find_add_mask(popi, single_start=6):
+    root = popi[0]
+    left = deque([0, ])
+    store = [0, root, ]
+    while len(left) > 0:
+        i = left.pop()
+        store.append(root + 2 * i + 1)
+        if popi[root + 2 * i + 1] < 100:
+            left.appendleft(2 * i + 1)
+        if popi[root + i] < single_start:
+            store.append(root + 2 * i + 2)
+            if popi[root + 2 * i + 2] < 100:
+                left.appendleft(2 * i + 2)
+    mask = np.full_like(popi, True, dtype=bool)
+    mask[store] = False
+    popi[mask] = 99
+    return popi
+
+
+def find_add_mask_all(pop, single_start=6):
+    for i in range(pop.shape[0]):
+        pop[i] = find_add_mask(pop[i], single_start)
+    return pop
+
+
+def find_used_index_total(pop, single_start=6):
+    list_index = []
+    for popi in pop:
+        list_index.append(find_used_index(popi, single_start))
+    return np.array(list_index)
 
 
 lr = LinearRegression(fit_intercept=True)

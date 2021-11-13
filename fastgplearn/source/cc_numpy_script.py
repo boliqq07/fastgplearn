@@ -9,7 +9,6 @@
 This is script. For install version, don't include it.
 """
 
-
 if __name__ == "__main__":
     import pathlib
     from mgetool.draft import DraftPyx

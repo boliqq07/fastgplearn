@@ -21,7 +21,6 @@ commands_ = [
 
 
 def main(prog='fastgplearn', description='fastgplearn command line tool.', args=None):
-
     commands = commands_
     parser = argparse.ArgumentParser(prog=prog,
                                      description=description,

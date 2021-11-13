@@ -7,15 +7,11 @@
 import os
 
 import numpy as np
-from mgetool.tool import time_this_function
-from numpy.random import choice
 from numpy import random as nprdm
-
+from numpy.random import choice
 
 try:
-    from fastgplearn.backend.c_numpy import c_numpy_backend_tool
-
-    csci_subs = c_numpy_backend_tool.sci_subs
+    from fastgplearn.backend.c_numpy import sci_subs as csci_subs
 except BaseException:
     csci_subs = None
 
@@ -141,7 +137,7 @@ def mutate(mutate_pop, func_num, xs_num, depth_min=1, depth_max=5, p_mutate=0.8,
     pii = 1 - (1 - p_mutate) ** (1 / prim_n)
     sub_pop = generate_random(func_num, xs_num, pop_size=pop_n, depth_min=depth_min, depth_max=depth_max,
                               p=p, func_p=func_p, xs_p=xs_p)
-    select_mark = choice((0, 1), size=(pop_n, prim_n), replace=True, p=(1 - pii, pii))
+    select_mark = choice((0, 1), size=(pop_n, prim_n), replace=True, p=(1 - pii, pii)).astype(np.uint8)
     mutate_pop = mutate_pop * (1 - select_mark) + sub_pop * select_mark
     return mutate_pop
 
@@ -162,7 +158,7 @@ def csub_science(pop, sci_template):
 
         root = int(pop[n, 0])
         pop[n, root] = v[0]
-        csci_subs(pop, s, v, root, n,half_prim_n)
+        csci_subs(pop, s, v, root, n, half_prim_n)
 
     index = nprdm.randint(0, high=le_scis, size=now_pop_n)
 
@@ -270,7 +266,6 @@ def mutate_sci(func_num, xs_num, pop_size=10, depth_min=1, depth_max=5, p=None, 
     if sci_template is None or sci_template == []:
         pass
     else:
-        pass
         # new_pop = sub_science(new_pop, sci_template)
         if csci_subs is None:
             new_pop = sub_science(new_pop, sci_template)
@@ -301,3 +296,15 @@ def crossover(pop_np, p_crossover=0.5):
     pop_np[need_num:need_num2, :whe], pop_np[0:need_num, :whe] = pop_np[0:need_num:, :whe], pop_np[need_num:need_num2,
                                                                                             :whe]
     return pop_np
+
+
+def sub_re_hall99(inds, func_num, xs_num):
+    """sub the 99 in halls."""
+    wh = inds == 99
+    deps = choice(np.append(np.arange(func_num, dtype=np.uint8), np.arange(100, 100 + xs_num, dtype=np.uint8)),
+                  replace=True, size=inds.shape)
+    deps2 = choice(np.arange(100, 100 + xs_num, dtype=np.uint8), size=(inds.shape[0], int(inds.shape[1] / 2)),
+                   replace=True)
+    deps[:, int(deps.shape[1] / 2):] = deps2
+    inds[wh] = deps[wh]
+    return inds

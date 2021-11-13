@@ -56,8 +56,8 @@ at::Tensor cos_(const at::Tensor& a, const at::Tensor& b) {
 	return at::sin(a);
 };
 
-const std::vector < at::Tensor(*)(const at::Tensor&, const at::Tensor&)> funcs = { add_ ,sub_ , mul_, div_, ln_, exp_,pow2_,pow3_,rec_,max_,min_,sin_,cos_ };
-const std::vector < std::string > func_names = { "add_" ,"sub_" , "mul_", "div_", "ln_", "exp_","pow2_","pow3_","rec_","max_","min_","sin_","cos_" };
+const std::vector < at::Tensor(*)(const at::Tensor&, const at::Tensor&)> funcs = { add_ ,sub_ , mul_, div_, max_,min_, ln_, exp_,pow2_,pow3_,rec_,sin_,cos_ };
+const std::vector < std::string > func_names = { "add_" ,"sub_" , "mul_", "div_", "ln_","max_","min_", "exp_","pow2_","pow3_","rec_","sin_","cos_" };
 
 
 //vector<at::tensor> x_test_x_set() {
@@ -76,8 +76,8 @@ const std::vector < std::string > func_names = { "add_" ,"sub_" , "mul_", "div_"
 
 
 
-at::Tensor get_value(const std::vector<int>& vei, at::Tensor& xs, const at::Tensor& y,
-	const std::vector <at::Tensor(*)(const at::Tensor&, const at::Tensor&)>& funcsi, int n = 0) {
+at::Tensor get_value(const std::vector<int>& vei, at::Tensor& xs, const at::Tensor& y, const at::Tensor& error_y,
+	const std::vector <at::Tensor(*)(const at::Tensor&, const at::Tensor&)>& funcsi, int n = 0, int single_start=6) {
 	//std::cout << xs[0] << std::endl;
 
 	int vei_size = vei.size();
@@ -91,7 +91,12 @@ at::Tensor get_value(const std::vector<int>& vei, at::Tensor& xs, const at::Tens
 		return xs[vei[n] - 100];
 	}
 	else {
-		return funcsi[vei[n]](get_value(vei, xs, y, funcsi, 2 * n + 1 - root), get_value(vei, xs, y, funcsi, 2 * n + 2 - root));
+	    if (vei[n]<single_start){
+		return funcsi[vei[n]](get_value(vei, xs, y, error_y, funcsi, 2 * n + 1 - root), get_value(vei, xs, y,error_y, funcsi, 2 * n + 2 - root));
+	    }
+	    else {
+	    return funcsi[vei[n]](get_value(vei, xs, y, error_y, funcsi, 2 * n + 1 - root), error_y);
+	    };
 	};
 };
 
@@ -145,7 +150,7 @@ at::Tensor get_sort_accuracy_together(at::Tensor& fake_ys, const at::Tensor& y) 
 }
 
 
-vector<at::Tensor> c_torch_cal(const vector<vector<int>> ve, at::Tensor xs, const at::Tensor y, vector<int> func_index) {
+vector<at::Tensor> c_torch_cal(const vector<vector<int>> ve, at::Tensor xs, const at::Tensor y, vector<int> func_index,int single_start=6) {
 
 	vector<at::Tensor> res;
 	std::vector < at::Tensor(*)(const at::Tensor&, const at::Tensor&)> funci;
@@ -159,7 +164,7 @@ vector<at::Tensor> c_torch_cal(const vector<vector<int>> ve, at::Tensor xs, cons
 
 	for (vector<int> vei : ve) {
 		try {
-			auto fake_y = get_value(vei, xs, y, funci, vei[0]);
+			auto fake_y = get_value(vei, xs, y, error_y, funci, vei[0],single_start);
 			res.push_back(fake_y);
 		}
 		catch (...) {
@@ -172,8 +177,8 @@ vector<at::Tensor> c_torch_cal(const vector<vector<int>> ve, at::Tensor xs, cons
 
 
 at::Tensor c_torch_score(const vector<vector<int>> ve, at::Tensor xs, const at::Tensor y,
-	vector<int> func_index = { 0,1,2,3,4,5,6,7,8,9,10,11,12 }, bool clf = false) {
-	std::vector<at::Tensor> res = c_torch_cal(ve, xs, y, func_index);
+	vector<int> func_index = { 0,1,2,3,4,5,6,7,8,9,10,11,12 }, bool clf = false, int single_start=6) {
+	std::vector<at::Tensor> res = c_torch_cal(ve, xs, y, func_index, single_start);
 	at::Tensor res2 = torch::stack(res);
 	if (clf == false) {
 		return get_corr_together(res2, y);
